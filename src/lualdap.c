@@ -776,9 +776,10 @@ static void get_attrs_param (lua_State *L, char *attrs[]) {
 		luaL_checkstack(L, n, NULL);
 		for (i = 0; i < n; i++) {
 			lua_rawgeti (L, -1, i+1); /* push table element */
-			if (lua_isstring (L, -1))
+			if (lua_isstring (L, -1)) {
 				attrs[i] = (char *)lua_tostring (L, -1);
-			else {
+				lua_pop(L, 1);
+			} else {
 				luaL_error (L, LUALDAP_PREFIX"invalid value #%d", i+1);
 			}
 		}
