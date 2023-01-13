@@ -215,7 +215,7 @@ local ld = assert (lualdap.open_simple ("ldap.server",
                 "mydn=manoeljoaquim,ou=people,dc=ldap,dc=world",
                 "mysecurepassword"))
 
-for dn, attribs in ld:search { base = "ou=people,dc=ldap,dc=world" } do
+for dn, attribs in ld:search { base = "ou=people,dc=ldap,dc=world", scope = "subtree" } do
     io.write (string.format ("\t[%s]\n", dn))
     for name, values in pairs (attribs) do
         io.write ("["..name.."] : ")
