@@ -447,9 +447,9 @@ end
 local function count_attrs (tab)
 	local counter = 0
 	for dn, entry in LD:search (tab) do
-        for k,v in pairs(entry) do
-            counter = counter + 1
-        end
+		for k,v in pairs(entry) do
+			counter = counter + 1
+		end
 	end
 	return counter
 end
@@ -482,10 +482,10 @@ describe("even more advanced search operation", function()
 		assert.is_same(1, count { base = BASE, scope = "subtree", filter = filter, attrs = "mail", })
 	end)
 	it("attrs as table works", function()
-		local attrs = {"mail", "homeDirectory", "givenName", "not_in_ldap"}
+		local attrs = {"name", "organization", "not_in_ldap"}
 		local tab = { base = BASE, scope = "subtree", filter = filter, attrs = attrs }
 		assert.is_same(1, count(tab))
-		assert.is_same(3, count_attrs(tab))
+		assert.is_same(2, count_attrs(tab))
 	end)
 	it("reusing search objects is possible", function()
 		local iter = assert.is_not_nil(LD:search { base = BASE, scope = "base", })
