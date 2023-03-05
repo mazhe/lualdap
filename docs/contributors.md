@@ -14,7 +14,7 @@ The following maintainers curated fixes, improvements and releases:
 
  * [Brett Delle Grazie](https://github.com/bdellegrazie) : 2014 - 2015
  * [Dennis Schridde](https://github.com/devurandom) : 2017 - 2019
- * [Fran&ccedil;ois Perrad](https://github.com/fperrad) : 2021
+ * [Fran&ccedil;ois Perrad](https://github.com/fperrad) : 2021 - 2023
 
 Significant contributions were made by (in order of appearance):
 
