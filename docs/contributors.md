@@ -28,3 +28,4 @@ Significant contributions were made by (in order of appearance):
  * [Victor Seva](https://github.com/linuxmaniac) <linuxmaniac@torreviejawireless.org>: `lualdap` global variable only with Lua 5.1
  * [Fran&ccedil;ois Perrad](https://github.com/fperrad) <francois.perrad@gadz.org>: Lua 5.4 compatiblity, fix WinLDAP
  * [Daurnimator](https://github.com/daurnimator) - Cleanup
+ * [Cyril Romain](https://github.com/cyrilRomain) <cyril@romain.tf>: Fix segfault in `search()` with multiple attrs
