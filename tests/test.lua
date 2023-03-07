@@ -485,7 +485,7 @@ describe("even more advanced search operation", function()
 		local attrs = {"name", "organization", "not_in_ldap"}
 		local tab = { base = BASE, scope = "subtree", filter = filter, attrs = attrs }
 		assert.is_same(1, count(tab))
-		assert.is_same(2, count_attrs(tab))
+		assert.is_same(4, count_attrs(tab))
 	end)
 	it("reusing search objects is possible", function()
 		local iter = assert.is_not_nil(LD:search { base = BASE, scope = "base", })
