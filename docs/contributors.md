@@ -29,3 +29,4 @@ Significant contributions were made by (in order of appearance):
  * [Fran&ccedil;ois Perrad](https://github.com/fperrad) <francois.perrad@gadz.org>: Lua 5.4 compatiblity, fix WinLDAP
  * [Daurnimator](https://github.com/daurnimator) - Cleanup
  * [Cyril Romain](https://github.com/cyrilRomain) <cyril@romain.tf>: Fix segfault in `search()` with multiple attrs
+ * [Will Robertson](https://github.com/wspr) <wspr81@gmail.com>: Improve example with `search()` in manual

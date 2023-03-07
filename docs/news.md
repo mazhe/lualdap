@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fix segfault in `search()` with multiple attrs
 
+### Changed
+* Improve example with `search()` in manual
+
 ## [1.3.0] - 2021-06-05
 ### Added
 * a new method `open` which deprecates `initialize`
