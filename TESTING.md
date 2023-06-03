@@ -84,7 +84,7 @@ $ . tests/openshift/test.env && tests/test.lua
 gives:
 
 ```
-133 successes / 0 failures / 0 errors / 0 pending : 0.329875 seconds
+154 successes / 0 failures / 0 errors / 0 pending : 0.460882 seconds
 ```
 
 Or via the `Makefile`, just `make check`.

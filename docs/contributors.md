@@ -30,3 +30,4 @@ Significant contributions were made by (in order of appearance):
  * [Daurnimator](https://github.com/daurnimator) - Cleanup
  * [Cyril Romain](https://github.com/cyrilRomain) <cyril@romain.tf>: Fix segfault in `search()` with multiple attrs
  * [Will Robertson](https://github.com/wspr) <wspr81@gmail.com>: Improve example with `search()` in manual
+ * [Alex Dowad](https://github.com/alexdowad) <alexinbeijing@gmail.com>: Add optional timeout argument to open and open_simple
