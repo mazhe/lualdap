@@ -16,6 +16,7 @@ site
 
 5*/
 debian/.debhelper
+debian/.dh_lua-libtool
 debian/lua-ldap
 debian/lua-ldap-dev
 debian/tmp

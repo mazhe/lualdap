@@ -1,17 +1,17 @@
 Source: lua-ldap
 Section: interpreters
 Priority: optional
-Maintainer: Victor Seva <vseva@debian.org>
+Maintainer: Debian Lua Team <pkg-lua-devel@lists.alioth.debian.org>
 Uploaders:
- Enrico Tassi <gareuselesinge@debian.org>,
+ Victor Seva <vseva@debian.org>,
 Build-Depends:
- debhelper (>= 10),
+ debhelper-compat (= 13),
  dh-lua (>= 12),
  libldap2-dev,
-Standards-Version: 4.2.1
+Standards-Version: 4.6.2
 Vcs-Git: https://salsa.debian.org/lua-team/lua-ldap.git
 Vcs-Browser: https://salsa.debian.org/lua-team/lua-ldap
-Homepage: https://lualdap.github.io/lualdap
+Homepage: https://github.com/lualdap/lualdap
 
 Package: lua-ldap
 Architecture: any
