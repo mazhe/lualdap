@@ -9,8 +9,8 @@ SLAPD := openshift
 
 CFLAGS_WARN := -pedantic -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings
 
-override CPPFLAGS := -DLUA_USE_C89 $(CPPFLAGS)
-override CFLAGS := -O2 -fPIC -std=c89 $(CFLAGS_WARN) $(CFLAGS)
+override CPPFLAGS := $(CPPFLAGS)
+override CFLAGS := -O2 -fPIC $(CFLAGS_WARN) $(CFLAGS)
 
 ifdef BUILD_VARIANT
 REPORT_DIR := test-reports/$(BUILD_VARIANT)
