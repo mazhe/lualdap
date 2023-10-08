@@ -19,6 +19,9 @@ It's developed for Lua 5.1, 5.2, 5.3 & 5.4, and OpenLDAP 2.3 or newer.
 
 The sources are hosted on [Github](https://github.com/lualdap/lualdap).
 
+The Teal type definition of this library is available
+[here](https://github.com/teal-language/teal-types/blob/master/types/lualdap/lualdap.d.tl).
+
 ## Installation
 
 LuaLDAP is available via [LuaRocks](https://luarocks.org/modules/fperrad/lualdap):
