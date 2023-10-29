@@ -65,7 +65,7 @@ The argument `who` should be the [distinguished name](manual.md#distinguished-na
 of the entry that has the password to be checked against
 the third argument, `password`.
 
-The optional argument `usetls` is a Boolean flag indicating
+The optional argument `usetls` is a boolean flag indicating
 if Transport Layer Security (TLS) should be used.
 
 The optional argument `timeout` is the connection timeout in seconds.
@@ -82,7 +82,7 @@ Open and initialize a connection to a LDAP server (without binding, see method `
 The argument `hostname` may contain a blank-separated list of hosts
 to try to connect to, and each host may optionally by of the form host:port.
 
-The optional argument `usetls` is a Boolean flag indicating
+The optional argument `usetls` is a boolean flag indicating
 if Transport Layer Security (TLS) should be used.
 
 The optional argument `timeout` is the connection timeout in seconds.
@@ -176,7 +176,7 @@ The parameters are described below:
 
 -    `attrsonly`
 
-     a Boolean value that must be either _false_ (default)
+     a boolean value that must be either _false_ (default)
      if both attribute names and values are to be retrieved,
      or _true_ if only names are wanted.
 
