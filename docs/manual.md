@@ -5,8 +5,9 @@ LuaLDAP is a simple interface from Lua to an LDAP client, in fact
 it is a bind to [OpenLDAP](https://www.openldap.org) client
 or [ADSI](https://docs.microsoft.com/en-us/windows/win32/adsi/about-adsi).
 
-LuaLDAP defines one single global variable: a table called `lualdap`.
-This table holds the functions used to create an LDAP connection object.
+LuaLDAP returns a single table (with Lua 5.1,
+this table is also stored in the global variable named `lualdap`)
+This table holds the functions used to instantiate an LDAP connection object.
 
 A connection object offers methods to perform any operation on
 the directory such as comparing values, adding new entries,
@@ -47,19 +48,19 @@ and the distinguished name of its parent.
 LuaLDAP will always use a string to represent the DN of any entry.
 
 A more precise definition can be found on the LDAP documentation.
-A list of some of these files can be found
+A list of some of these resources can be found
 in [Related documentation](manual.md#related-documentation) section.
 
-# Initialization functions
+# Instantiation functions
 
-LuaLDAP provides a single way to connect to an LDAP server:
+LuaLDAP provides some ways to create a LDAP connection object:
 
 ### `lualdap.open_simple (hostname, who, password, usetls, timeout)`
 
 Initializes a session with an LDAP server.
 
 The argument `hostname` may contain a blank-separated list of hosts
-to try to connect to, and each host may optionally by of the form host:port.
+to try to connect to, and each host may optionally by of the form _host:port_.
 
 The argument `who` should be the [distinguished name](manual.md#distinguished-names)
 of the entry that has the password to be checked against
@@ -80,7 +81,7 @@ In case of error it returns `nil` followed by an error string.
 Open and initialize a connection to a LDAP server (without binding, see method `bind_simple`).
 
 The argument `hostname` may contain a blank-separated list of hosts
-to try to connect to, and each host may optionally by of the form host:port.
+to try to connect to, and each host may optionally by of the form _host:port_.
 
 The optional argument `usetls` is a boolean flag indicating
 if Transport Layer Security (TLS) should be used.
@@ -120,8 +121,8 @@ API errors will raise a Lua error,
 while LDAP errors will be reported by the function/method returning `nil`
 plus the error message provided by the OpenLDAP client.
 
-A connection object can be created by calling the
-[Initialization function](manual.md#initialization-functions).
+A connection object can be created by calling a
+[Instantiation function](manual.md#instantiation-functions).
 
 ## Methods
 
@@ -129,9 +130,13 @@ A connection object can be created by calling the
 
 Adds a new entry to the directory with the given attributes and values.
 
-### `conn:bind_simple (username, password)`
+### `conn:bind_simple (who, password)`
 
 Bind to the directory.
+
+The argument `who` should be the [distinguished name](manual.md#distinguished-names)
+of the entry that has the password to be checked against
+the second argument, `password`.
 
 Returns the connection object if the operation was successful.
 In case of error it returns `nil` followed by an error string.
@@ -139,6 +144,8 @@ In case of error it returns `nil` followed by an error string.
 ### `conn:close ()`
 
 Closes the connection `conn`.
+
+Returns `1` in case of success; nothing when already closed.
 
 ### `conn:compare (distinguished_name, attribute, value)`
 
@@ -161,9 +168,15 @@ The valid operations are:
 
 Any number of tables of operations will be used in a single LDAP modify operation.
 
-### `conn:rename (distinguished_name, new_relative_dn, new_parent)`
+### `conn:rename (distinguished_name, new_relative_dn, new_parent, delete_old)`
 
 Changes an entry name (i.e. change its [distinguished name](manual.md#distinguished-names)).
+
+The optional argument `new_parent` is a [distinguished name](manual.md#distinguished-names),
+without it only the RDN is changed.
+
+The optional argument `delete_old` is an integer. With the default value `0`,
+old RDN should be retained, otherwise old RDN should be deleted.
 
 ### `conn:search (table_of_search_parameters)`
 
@@ -176,9 +189,9 @@ The parameters are described below:
 
 -    `attrsonly`
 
-     a boolean value that must be either _false_ (default)
+     a boolean value that must be either `false` (default)
      if both attribute names and values are to be retrieved,
-     or _true_ if only names are wanted.
+     or `true` if only names are wanted.
 
 -    `base`
 
@@ -214,33 +227,34 @@ as returned by the search request.
 
 # Example
 
-here is a some sample code that demonstrate the basic use of the library.
+Here is a some sample code that demonstrate the basic use of the library (see also the 
+[Teal type definition](https://github.com/teal-language/teal-types/blob/master/types/lualdap/lualdap.d.tl) of the library).
 
 ```lua
-local lualdap = require "lualdap"
+local lualdap = require"lualdap"
 
-local ld = assert (lualdap.open_simple ("ldap.server",
+local ld = assert(lualdap.open_simple("ldap.server",
                 "mydn=manoeljoaquim,ou=people,dc=ldap,dc=world",
                 "mysecurepassword"))
 
-for dn, attribs in ld:search { base = "ou=people,dc=ldap,dc=world", scope = "subtree" } do
-    io.write (string.format ("\t[%s]\n", dn))
-    for name, values in pairs (attribs) do
-        io.write ("["..name.."] : ")
-        if type (values) == "string" then
-            io.write (values)
-        elseif type (values) == "table" then
+for dn, attribs in ld:search{ base = "ou=people,dc=ldap,dc=world", scope = "subtree" } do
+    io.write("\t[" .. dn .. "]\n")
+    for name, values in pairs(attribs) do
+        io.write("[" .. name .. "] : ")
+        if type(values) == "string" then
+            io.write(values)
+        elseif type(values) == "table" then
             local n = #values
-            for i = 1, (n-1) do
-                io.write (values[i]..",")
+            for i = 1, n-1 do
+                io.write(values[i] .. ",")
             end
-            io.write (values[n])
+            io.write(values[n])
         end
-        io.write ("\n")
+        io.write("\n")
     end
 end
 
-ld:add ("mydn=newuser,ou=people,dc=ldap,dc=world", {
+ld:add("mydn=newuser,ou=people,dc=ldap,dc=world", {
     objectClass = { "", "", },
     mydn = "newuser",
     abc = "qwerty",
@@ -248,22 +262,29 @@ ld:add ("mydn=newuser,ou=people,dc=ldap,dc=world", {
     givenName = "New User",
 })()
 
-ld:modify {"mydn=newuser,ou=people,dc=ldp,dc=world",
+ld:modify("mydn=newuser,ou=people,dc=ldp,dc=world",
     { '=', givenName = "New", cn = "New", sn = "User", },
     { '+', o = { "University", "College", },
            mail = "newuser@university.edu", },
-    { '-', abc = true, tel = "123456758", },
-    { '+', tel = "13579113", },
-}()
+    { '-', abc = "True", tel = "123456758", },
+    { '+', tel = "13579113", }
+)()
 
-ld:delete ("mydn=newuser,ou=people,dc=ldp,dc=world")()
+ld:delete("mydn=newuser,ou=people,dc=ldp,dc=world")()
 ```
 
 # Related documentation
 
-- [Lightweight Directory Access Protocol (LDAP): The Protocol](https://tools.ietf.org/html/rfc4511)
-- [Lightweight Directory Access Protocol (LDAP): Technical Specification](https://tools.ietf.org/html/rfc4510)
-- [Lightweight Directory Access Protocol (LDAP): String Representation of Search Filters](https://tools.ietf.org/html/rfc4515)
-- [The C LDAP Application Program Interface](https://www.ietf.org/proceedings/51/I-D/draft-ietf-ldapext-ldap-c-api-05.txt)
+- [LDAP: Technical Specification Road Map](https://tools.ietf.org/html/rfc4510) (RFC4510)
+- [LDAP: The Protocol](https://tools.ietf.org/html/rfc4511) (RFC4511)
+- [LDAP: Directory Information Models](https://tools.ietf.org/html/rfc4512) (RFC4512)
+- [LDAP: Authentication Methods and Security Mechanisms](https://tools.ietf.org/html/rfc4513) (RFC4513)
+- [LDAP: String Representation of Distinguished Names](https://tools.ietf.org/html/rfc4514) (RFC4514)
+- [LDAP: String Representation of Search Filters](https://tools.ietf.org/html/rfc4515) (RFC4515)
+- [LDAP: Uniform Resource Locator](https://tools.ietf.org/html/rfc4516) (RFC4516)
+- [LDAP: Syntaxes and Matching Rules](https://tools.ietf.org/html/rfc4517) (RFC4517)
+- [LDAP: Internationalized String Preparation](https://tools.ietf.org/html/rfc4518) (RFC4518)
+- [LDAP: Schema for User Applications](https://tools.ietf.org/html/rfc4519) (RFC4519)
+- [The C LDAP Application Program Interface](https://www.ietf.org/proceedings/51/I-D/draft-ietf-ldapext-ldap-c-api-05.txt) (draft IETF)
 - [OpenLDAP API](https://openldap.org/software/man.cgi?query=ldap)
 - [WinLDAP API](https://docs.microsoft.com/en-us/windows/win32/api/_ldap/)
