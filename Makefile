@@ -1,5 +1,5 @@
 T= lualdap
-V= 1.3.1
+V= 1.4.0
 R= 1
 CONFIG= ./config
 
