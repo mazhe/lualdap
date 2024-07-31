@@ -16,6 +16,7 @@
 #else
 #include <ldap.h>
 #endif
+#include <sasl/sasl.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -91,6 +92,13 @@ typedef struct {
 	BerValue   bvals[LUALDAP_MAX_VALUES];
 	int        bi;
 } attrs_data;
+
+/* LDAP SASL auth data structure */
+typedef struct {
+	const char  *authcid;
+	const char  *realm;
+	const char  *password;
+} sasl_auth_data;
 
 
 int luaopen_lualdap (lua_State *L);
@@ -456,6 +464,72 @@ static int lualdap_bind_simple (lua_State *L) {
 	if (err != LDAP_SUCCESS)
 		return faildirect (L, ldap_err2string (err));
 
+	lua_pushvalue (L, 1);
+	return 1;
+}
+
+
+/*
+** Interact function for lualdap_bind_sasl
+** @param #1 LDAP connection.
+** @param #2 Flags.
+** @param #3 Callback values.
+** @param #4 Callback function.
+** @return LDAP code.
+ */
+static int lualdap_bind_sasl_interact (LDAP *ld, unsigned flags, void *defaults, void *sasl_interact) {
+	sasl_auth_data *auth= (sasl_auth_data*)defaults;
+	sasl_interact_t *interact = (sasl_interact_t*)sasl_interact;
+	(void)flags;
+
+	if (ld == NULL)
+		return LDAP_PARAM_ERROR;
+
+	while (interact->id != SASL_CB_LIST_END) {
+        interact->result = NULL;
+		switch( interact->id ) {
+			case SASL_CB_GETREALM:
+				interact->result = auth->realm;
+				break;
+			case SASL_CB_AUTHNAME:
+				interact->result = auth->authcid;
+				break;
+			case SASL_CB_PASS:
+				interact->result = auth->password;
+				break;
+			default:
+				break;
+		}
+        interact->len = (interact->result == NULL)
+			? 0
+			: strlen (interact->result);
+        interact++;
+    }
+
+    return LDAP_SUCCESS;
+}
+
+
+/*
+** Bind to the directory using SASL.
+** @param #1 LDAP connection.
+** @param #2 String with username.
+** @param #3 String with realm.
+** @param #4 String with password.
+** @param #5 String with comma separated mechanisms.
+** @return LDAP connection on success.
+*/
+static int lualdap_bind_sasl (lua_State *L) {
+	conn_data *conn = getconnection (L);
+	const char *username = luaL_checkstring (L, 2);
+	const char *realm = luaL_checkstring (L, 3);
+	const char *password = luaL_checkstring (L, 4);
+	const char *mechs = luaL_checkstring (L, 5);
+	sasl_auth_data authdata = {username, realm, password};
+	int err;
+	err = ldap_sasl_interactive_bind_s(conn->ld, NULL, mechs, NULL, NULL, LDAP_SASL_QUIET, lualdap_bind_sasl_interact, &authdata);
+	if (err != LDAP_SUCCESS)
+		return faildirect (L, ldap_err2string (err));
 	lua_pushvalue (L, 1);
 	return 1;
 }
@@ -1075,6 +1149,55 @@ static int lualdap_open_simple (lua_State *L) {
 
 
 /*
+** Open and initialize a connection to a server using SASL.
+** @param #1 String with hostname.
+** @param #2 String with username.
+** @param #3 String with realm.
+** @param #4 String with password.
+** @param #5 String with comma-separated mechs.
+** @param #6 Boolean indicating if TLS must be used.
+** @param #7 Number for connection timeout (optional).
+** @return #1 Userdata with connection structure.
+*/
+static int lualdap_open_sasl (lua_State *L) {
+	ldap_pchar_t host = (ldap_pchar_t) luaL_checkstring (L, 1);
+	const char *username = luaL_optstring (L, 2, "");
+	const char *realm = luaL_optstring (L, 3, "");
+	const char *password = luaL_optstring (L, 4, "");
+	const char *mechs = luaL_optstring (L, 5, "");
+	int use_tls = lua_toboolean (L, 6);
+	double timeout = lua_tonumber (L, 7);
+
+	/* Open */
+	lua_pushcfunction (L, lualdap_open);
+	lua_pushstring (L, host);
+	lua_pushboolean (L, use_tls);
+	lua_pushnumber (L, timeout);
+	lua_call (L, 3, 2);
+	if (lua_isnil (L, -2)) {
+		return 2; /* nil, msg */
+	} else {
+		lua_pop (L, 1); /* keep only the userdata (LDAP connection) */
+	}
+
+	/* Bind to a server */
+	lua_pushcfunction (L, lualdap_bind_sasl);
+	lua_pushvalue (L, -2); /* connection */
+	lua_pushstring (L, username);
+	lua_pushstring (L, realm);
+	lua_pushstring (L, password);
+	lua_pushstring (L, mechs);
+	lua_call (L, 5, 2);
+	if (lua_isnil (L, -2)) {
+		return 2; /* Pass through in case of errors */
+	} else {
+		lua_pop (L, 2); /* Discard return values from lualdap_bind_sasl */
+	}
+	return 1;
+}
+
+
+/*
 ** Assumes the table is on top of the stack.
 */
 static void set_info (lua_State *L) {
@@ -1097,6 +1220,7 @@ int luaopen_lualdap (lua_State *L) {
 #endif
 		{"open", lualdap_open},
 		{"open_simple", lualdap_open_simple},
+		{"open_sasl", lualdap_open_sasl},
 		/* placeholders */
 		{"_COPYRIGHT", NULL},
 		{"_DESCRIPTION", NULL},
